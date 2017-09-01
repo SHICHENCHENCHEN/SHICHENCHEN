@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			* {
+				margin:0;
+				padding:0;
+			}
+			#can {
+				display:block;
+				background: #000;
+				margin:auto;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="can" width="700" height="700"></canvas>
+		<script type="text/javascript">
+			var c=document.getElementById('can');
+			var ctx=c.getContext('2d');
+			var width=document.documentElement.clientWidth;
+			var height=document.documentElement.clientHeight;
+			var setArr=[];//声明一个数组,用于存放每个粒子的状态
+			var max=100;//产生粒子的最大数量
+			var timer=null;
+			//设置画布的宽和高
+			c.width=width;
+			c.height=height;
+			timer=setInterval(function(){
+				//如果产生粒子的数量超过最大数量就清除定时器
+				if(setArr.length>=max){
+					clearInterval(timer);
+				}
+				/*设置粒子的状态*/
+				//设置粒子的位置
+				var cx=200+Math.ceil(Math.random()*200);
+				var cy=200+Math.ceil(Math.random()*200);
+				//设置粒子的半径
+				var r=5+Math.ceil(Math.random()*20);
+				//设置粒子的背景色用rgb表示
+				var red=Math.floor(Math.random()*256);
+				var green=Math.floor(Math.random()*256);
+				var blue=Math.floor(Math.random()*256);
+				//设置粒子的随机透明度
+				var alpha=0.3+Math.random();
+				//设置粒子的随机速度
+				var speedX=-2+Math.ceil(Math.random()*4);
+				var speedY=-2+Math.ceil(Math.random()*4);
+				//粒子的状态以对象的形式保存
+				var obj={
+					cx:cx,
+					cy:cy,
+					r:r,
+					speedX:speedX,
+					speedY:speedY,
+					bgcolor:'rgba('+red+','+green+','+blue+','+alpha+')',
+				};
+				//如果速度不为0,则将整个粒子存于数组中
+				if(speedX!==0||speedY!==0){
+					setArr.push(obj);
+				}
+			},10000/60);
+			setInterval(function(){
+				ctx.clearRect(0,0,c.width,c.height);
+				for(var i=0;i<setArr.length;i++){
+					ctx.beginPath();
+					/*	  
+						检测上下边界:
+						如果y轴坐标减去粒子半径小于等于0,则说明与上边界发生碰撞,
+						如果y轴坐标加上粒子半径大于等于画布的宽度,则说明与下边界发生碰撞
+					 */
+					if(setArr[i].cy-setArr[i].r<=0||setArr[i].cy+setArr[i].r>=c.height){
+						setArr[i].speedY=setArr[i].speedY*(-1);
+					}
+					/*检测左右边界*/
+					if(setArr[i].cx-setArr[i].r<=0||setArr[i].cx+setArr[i].r>=c.width){
+						setArr[i].speedX=setArr[i].speedX*(-1);
+					}
+					setArr[i].cx+=setArr[i].speedX;
+					setArr[i].cy+=setArr[i].speedY;
+					ctx.fillStyle=setArr[i].bgcolor;
+					ctx.arc(setArr[i].cx,setArr[i].cy,setArr[i].r,0,Math.PI*2);
+					ctx.fill();
+				}
+			},30)
+		</script>
+	</body>
+</html>
