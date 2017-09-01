@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	
+		<style>
+			.wrap {
+				width:800px;
+				margin:50px auto;
+			}
+			#can {
+				border:5px solid #ccc;
+			}
+			.box {
+				width:100%;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<canvas id="can" width="800" height="500"></canvas>
+		</div>
+		<div class="box">
+			选择颜色: <input type="color" id="color" />
+			选择宽度: <input type="range" id="width" max="20" />
+			选择透明度: <input type="range" id="alpha" max="10" />
+			<input type="button" value="清空画布" id="clear" />
+			<input type="button" value="上一步" id="prev" />
+			<input type="button" value="橡皮擦" id="easer" />
+		</div>
+		<script type="text/javascript">
+			var c=document.getElementById('can');
+			var color=document.getElementById('color');
+			var alpha=document.getElementById('alpha');
+			var width=document.getElementById('width');
+			var clear=document.getElementById('clear');
+			var prev=document.getElementById('prev');
+			var easer=document.getElementById('easer');
+			var ctx=c.getContext('2d');
+			var prevArr=[];
+			var iNow=0;
+			var draw=true;
+			c.onmousedown=function(ev){
+				prevArr.length=iNow;
+				iNow++;
+				prevArr.push(ctx.getImageData(0,0,c.width,c.height));
+				var disx=ev.offsetX;
+				var disy=ev.offsetY;
+				c.onmousemove=function(ev){
+					ctx.beginPath();
+					ctx.moveTo(disx,disy);
+					ctx.lineTo(ev.offsetX,ev.offsetY);
+					ctx.lineWidth=width.value;
+					ctx.strokeStyle=color.value;
+					ctx.globalAlpha=alpha.value/10;
+					ctx.globalCompositeOperation='source-over';
+					if(!draw){
+						ctx.globalCompositeOperation='destination-out';
+						ctx.globalAlpha=1;
+					};
+					ctx.stroke();
+					disx=ev.offsetX;
+					disy=ev.offsetY;
+				};
+				c.onmouseup=function(){
+					c.onmousemove=null;
+				};
+			};
+			clear.onclick=function(){
+				ctx.clearRect(0,0,c.width,c.height);
+			}
+			prev.onclick=function(){
+				if(iNow==0)return;
+				iNow--;
+				ctx.putImageData(prevArr[iNow],0,0);
+			}
+			easer.onclick=function(){
+				if(draw){
+					this.value='画笔';
+					draw=false;
+				}else{
+					this.value='橡皮擦';
+					draw=true;
+				};
+			};
+		</script>
+	</body>
+</html>
